@@ -24,32 +24,68 @@ func NewJSONStorage(filename string) (*JSONStorage, error) {
 	var file *os.File
 	var err error
 	var todoData JSONTodoData
-	newFile := false
 	file, err = os.Open(filename)
 	if errors.Is(err, os.ErrNotExist) {
-		file, err = os.Create(filename)
-		if err != nil {
-			return nil, err
+		todoData.Todos = make(map[int]*app.Todo)
+		todoData.NameIndex = make(map[string][]int)
+		jsonStore := JSONStorage{
+			File: filename,
+			Data: &todoData,
 		}
-		newFile = true
+		return &jsonStore, nil
 	} else if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-
-	if !newFile {
-		data, err := io.ReadAll(file)
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(data, &todoData); err != nil {
-			return nil, err
-		}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
 	}
-
+	if err := json.Unmarshal(data, &todoData); err != nil {
+		return nil, err
+	}
 	jsonStore := JSONStorage{
 		File: filename,
 		Data: &todoData,
 	}
 	return &jsonStore, nil
+}
+
+func (s *JSONStorage) GetNewId() int {
+	var maxId int
+	for id := range s.Data.Todos {
+		if id > maxId {
+			maxId = id
+		}
+	}
+	return maxId + 1
+}
+
+func (s *JSONStorage) NewTodo(todo app.Todo) error {
+	s.Data.Todos[todo.Id] = &todo
+	s.Data.Order = append(s.Data.Order, todo.Id)
+	ni, ok := s.Data.NameIndex[todo.Name]
+	if !ok {
+		ni = make([]int, 0, 1)
+	}
+	ni = append(ni, todo.Id)
+	s.Data.NameIndex[todo.Name] = ni
+	return nil
+}
+
+func (s JSONStorage) Save() error {
+	file, err := os.Create(s.File)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	data, err := json.Marshal(s.Data)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

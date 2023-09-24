@@ -4,6 +4,7 @@ import "time"
 
 type Storage interface {
 	GetNewId() int
+	NewTodo(todo Todo) error
 }
 
 type Todo struct {
@@ -26,4 +27,9 @@ func NewTodo(name string, desc string, store Storage) *Todo {
 		CreatedDate: &now,
 	}
 	return &todo
+}
+
+func (t *Todo) Save(store Storage) error {
+	err := store.NewTodo(*t)
+	return err
 }
