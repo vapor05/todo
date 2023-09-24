@@ -71,7 +71,10 @@ func TestNewJSONStorage(t *testing.T) {
 	}
 	want := &JSONStorage{
 		File: "test.json",
-		Data: &JSONTodoData{},
+		Data: &JSONTodoData{
+			Todos:     make(map[int]*app.Todo),
+			NameIndex: make(map[string][]int),
+		},
 	}
 	assert.Equal(t, want, storage)
 	// existing data file
@@ -150,7 +153,7 @@ func TestNewTodo(t *testing.T) {
 	cd1 := time.Date(2023, 9, 23, 3, 30, 0, 0, time.Local)
 	cd2 := time.Date(2023, 9, 23, 3, 32, 0, 0, time.Local)
 	store := JSONStorage{
-		File: "testsave.json",
+		File: "testnewtodo.json",
 		Data: &JSONTodoData{
 			Order: []int{1, 2},
 			Todos: map[int]*app.Todo{
@@ -176,7 +179,7 @@ func TestNewTodo(t *testing.T) {
 		},
 	}
 	want := JSONStorage{
-		File: "testsave.json",
+		File: "testnewtodo.json",
 		Data: &JSONTodoData{
 			Order: []int{1, 2, 12},
 			Todos: map[int]*app.Todo{
@@ -209,7 +212,10 @@ func TestNewTodo(t *testing.T) {
 			},
 		},
 	}
-	store.NewTodo(todo)
+	err := store.NewTodo(todo)
+	if err != nil {
+		t.Fatalf("error running NewTodo method, %v", err)
+	}
 	assert.Equal(t, want, store)
 	// new todo with same name as existing todo
 	cd3 := time.Now()
@@ -220,9 +226,12 @@ func TestNewTodo(t *testing.T) {
 		Active:      true,
 		CreatedDate: &cd3,
 	}
-	store.NewTodo(todo)
+	err = store.NewTodo(todo)
+	if err != nil {
+		t.Fatalf("error running NewTodo method, %v", err)
+	}
 	want = JSONStorage{
-		File: "testsave.json",
+		File: "testnewtodo.json",
 		Data: &JSONTodoData{
 			Order: []int{1, 2, 12, 15},
 			Todos: map[int]*app.Todo{
@@ -263,6 +272,10 @@ func TestNewTodo(t *testing.T) {
 		},
 	}
 	assert.Equal(t, want, store)
+	err = os.Remove("testnewtodo.json")
+	if err != nil {
+		t.Fatalf("failed to remove test json file, %v", err)
+	}
 }
 
 func TestSave(t *testing.T) {

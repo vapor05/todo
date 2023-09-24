@@ -35,9 +35,7 @@ func NewTodo(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	todo := app.NewTodo(name, description, store)
-	store.NewTodo(*todo)
-	err = store.Save()
+	err = app.New(name, description, store)
 	if err != nil {
 		return err
 	}

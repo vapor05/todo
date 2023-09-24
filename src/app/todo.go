@@ -1,6 +1,8 @@
 package app
 
-import "time"
+import (
+	"time"
+)
 
 type Storage interface {
 	GetNewId() int
@@ -32,4 +34,13 @@ func NewTodo(name string, desc string, store Storage) *Todo {
 func (t *Todo) Save(store Storage) error {
 	err := store.NewTodo(*t)
 	return err
+}
+
+func New(name string, description string, store Storage) error {
+	todo := NewTodo(name, description, store)
+	err := todo.Save(store)
+	if err != nil {
+		return err
+	}
+	return nil
 }

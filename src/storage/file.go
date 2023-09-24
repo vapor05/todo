@@ -70,6 +70,9 @@ func (s *JSONStorage) NewTodo(todo app.Todo) error {
 	}
 	ni = append(ni, todo.Id)
 	s.Data.NameIndex[todo.Name] = ni
+	if err := s.Save(); err != nil {
+		return err
+	}
 	return nil
 }
 

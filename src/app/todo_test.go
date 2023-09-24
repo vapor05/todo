@@ -63,3 +63,21 @@ func TestTodoSave(t *testing.T) {
 	}
 	assert.Equal(t, saveErr, err)
 }
+
+func TestNew(t *testing.T) {
+	mock := MockStorage{NextId: 5}
+	want := Todo{
+		Id:          5,
+		Name:        "some todo",
+		Description: "test",
+		Active:      true,
+	}
+	err := New("some todo", "test", &mock)
+	if err != nil {
+		t.Fatalf("error running New function, %v", err)
+	}
+	assert.NotNil(t, mock.Data.CreatedDate)
+	mock.Data.CreatedDate = nil
+	assert.Equal(t, &want, mock.Data)
+
+}
