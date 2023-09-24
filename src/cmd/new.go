@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vapor05/todo/src/app"
-	"github.com/vapor05/todo/src/storage"
 )
 
 func init() {
@@ -31,11 +30,7 @@ func NewTodo(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create new todo: %w", err)
 	}
 	description := strings.TrimSuffix(input, "\n")
-	store, err := storage.NewJSONStorage(DataFile)
-	if err != nil {
-		return err
-	}
-	err = app.New(name, description, store)
+	err = app.New(name, description, Store)
 	if err != nil {
 		return err
 	}

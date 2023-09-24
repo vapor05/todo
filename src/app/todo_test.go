@@ -12,6 +12,7 @@ type MockStorage struct {
 	NextId int
 	Data   *Todo
 	Error  error
+	list   []*Todo
 }
 
 func (m *MockStorage) GetNewId() int {
@@ -24,6 +25,13 @@ func (m *MockStorage) NewTodo(todo Todo) error {
 	}
 	m.Data = &todo
 	return nil
+}
+
+func (m *MockStorage) ListTodos() ([]*Todo, error) {
+	if m.Error != nil {
+		return nil, m.Error
+	}
+	return m.list, nil
 }
 
 func TestNewTodo(t *testing.T) {

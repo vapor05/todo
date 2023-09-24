@@ -7,6 +7,7 @@ import (
 type Storage interface {
 	GetNewId() int
 	NewTodo(todo Todo) error
+	ListTodos() ([]*Todo, error)
 }
 
 type Todo struct {
@@ -43,4 +44,12 @@ func New(name string, description string, store Storage) error {
 		return err
 	}
 	return nil
+}
+
+func List(store Storage) ([]*Todo, error) {
+	todos, err := store.ListTodos()
+	if err != nil {
+		return nil, err
+	}
+	return todos, nil
 }

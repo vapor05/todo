@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"sort"
 	"testing"
 	"time"
 
@@ -325,4 +326,59 @@ func TestSave(t *testing.T) {
 		t.Fatalf("failed to load saved json file, %v", err)
 	}
 	assert.Equal(t, store.Data, &actual)
+}
+
+func TestListTodos(t *testing.T) {
+	cd1 := time.Date(2023, 9, 23, 3, 30, 0, 0, time.Local)
+	cd2 := time.Date(2023, 9, 23, 3, 32, 0, 0, time.Local)
+	store := JSONStorage{
+		File: "test.json",
+		Data: &JSONTodoData{
+			Order: []int{1, 2},
+			Todos: map[int]*app.Todo{
+				1: {
+					Id:          1,
+					Name:        "first todo",
+					Description: "some desc",
+					Active:      true,
+					CreatedDate: &cd1,
+				},
+				2: {
+					Id:          2,
+					Name:        "next todo",
+					Description: "some desc2",
+					Active:      true,
+					CreatedDate: &cd2,
+				},
+			},
+			NameIndex: map[string][]int{
+				"first todo": {1},
+				"next todo":  {2},
+			},
+		},
+	}
+	want := []*app.Todo{
+		{
+			Id:          1,
+			Name:        "first todo",
+			Description: "some desc",
+			Active:      true,
+			CreatedDate: &cd1,
+		},
+		{
+			Id:          2,
+			Name:        "next todo",
+			Description: "some desc2",
+			Active:      true,
+			CreatedDate: &cd2,
+		},
+	}
+	actual, err := store.ListTodos()
+	if err != nil {
+		t.Fatalf("error running ListTodos method, %v", err)
+	}
+	sort.Slice(actual, func(i, j int) bool {
+		return actual[i].Id < actual[j].Id
+	})
+	assert.Equal(t, want, actual)
 }

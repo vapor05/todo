@@ -5,9 +5,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/vapor05/todo/src/storage"
 )
 
-var DataFile string
+var (
+	Store    *storage.JSONStorage
+	DataFile string
+)
 
 var RootCmd = &cobra.Command{
 	Use:   "todo",
@@ -22,6 +26,16 @@ func init() {
 		&DataFile, "data-file", "todos.json",
 		"name of json file used to store todo data",
 	)
+	RootCmd.PersistentPreRunE = SetupStorage
+}
+
+func SetupStorage(cmd *cobra.Command, args []string) error {
+	var err error
+	Store, err = storage.NewJSONStorage(DataFile)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Execute() {

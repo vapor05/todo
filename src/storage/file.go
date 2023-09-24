@@ -92,3 +92,11 @@ func (s JSONStorage) Save() error {
 	}
 	return nil
 }
+
+func (s JSONStorage) ListTodos() ([]*app.Todo, error) {
+	list := make([]*app.Todo, 0, len(s.Data.Todos))
+	for _, t := range s.Data.Todos {
+		list = append(list, t)
+	}
+	return list, nil
+}
